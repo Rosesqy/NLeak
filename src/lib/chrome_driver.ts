@@ -63,9 +63,15 @@ function spawnChromeBrowser(session: ChromeSession, headless: boolean, width: nu
   };
   switch (platform()) {
     case 'darwin':
-      return session.spawnBrowser(Object.assign({
-        browserType: "system" as "system"
-       }, baseOptions));
+      const browser = session.spawnBrowser(
+        Object.assign(
+          {
+            executablePath: '/Applications/Google Chrome_2018.app/Contents/MacOS/Google Chrome',
+          },
+          baseOptions
+        )
+      );
+      return browser
     case 'freebsd':
     case 'linux':
     case 'openbsd': {
@@ -109,9 +115,7 @@ function spawnChromeBrowser(session: ChromeSession, headless: boolean, width: nu
 
 export default class ChromeDriver {
   public static async Launch(log: Log, headless: boolean, width: number, height: number, interceptPaths: string[] = [], quiet: boolean = true, chromeArgs: string[] = []): Promise<ChromeDriver> {
-    console.log("=========== ChromeDriver entered: ", interceptPaths)
     const mitmProxy = await MITMProxy.Create(undefined, interceptPaths, quiet);
-    console.log("=========== MITMProxy created")
 
     // Tell mitmProxy to stash data requested through the proxy.
     mitmProxy.stashEnabled = true;
@@ -119,9 +123,12 @@ export default class ChromeDriver {
     let chromeProcess: ChromeProcess = await spawnChromeBrowser(session, headless, width, height, chromeArgs);
     // open the REST API for tabs
     const client = session.createAPIClient("localhost", chromeProcess.remoteDebuggingPort);
+
     const tabs = await client.listTabs();
     const tab = tabs[0];
     await client.activateTab(tab.id);
+    console.log("[DEBUG] opened tab", tab)
+
     // open the debugger protocol
     // https://chromedevtools.github.io/devtools-protocol/
     const debugClient = await session.openDebuggingProtocol(tab.webSocketDebuggerUrl);
@@ -133,6 +140,8 @@ export default class ChromeDriver {
     const runtime = new ChromeRuntime(debugClient);
     const dom = new ChromeDOM(debugClient);
     await Promise.all([heapProfiler.enable(), network.enable({}),  chromeConsole.enable(), page.enable(), runtime.enable(), dom.enable()]);
+    console.log("[DEBUG] all debugger ready!", network, dom)
+
     // Intercept network requests.
     // await network.setRequestInterceptionEnabled({ enabled: true });
     // Disable cache
@@ -140,7 +149,21 @@ export default class ChromeDriver {
     // Disable service workers
     await network.setBypassServiceWorker({ bypass: true });
 
-    const driver = new ChromeDriver(log, headless, width, height, interceptPaths, quiet, mitmProxy, chromeProcess, page, runtime, heapProfiler, chromeConsole);
+    const driver = new ChromeDriver(
+      log,
+      headless,
+      width,
+      height,
+      interceptPaths,
+      quiet,
+      mitmProxy,
+      chromeProcess,
+      page,
+      runtime,
+      heapProfiler,
+      chromeConsole
+    );
+    console.log("[DEBUG] inited driver", driver)
 
     return driver;
   }
@@ -174,6 +197,7 @@ export default class ChromeDriver {
     this._interceptPaths = interceptPaths;
     this._quiet = quiet;
 
+    log.log("[DEBUG] in constructor")
     this._console.messageAdded = (evt) => {
       const m = evt.message;
       log.debug(`[${m.level}] [${m.source}] ${m.url}:${m.line}:${m.column} ${m.text}`);

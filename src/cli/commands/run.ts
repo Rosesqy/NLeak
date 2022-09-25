@@ -64,7 +64,6 @@ const Run: CommandModule = {
 
     async function main() {
       const configFileSource = readFileSync(args.config).toString();
-      console.log("=========== here 1")
 
       let shuttingDown = false;
       async function shutDown() {
@@ -99,11 +98,9 @@ const Run: CommandModule = {
       }
 
       writeFileSync(join(args.out, 'config.js'), configFileSource);
-      console.log("=========== here 2")
 
       chromeDriver = await ChromeDriver.Launch(progressBar, args.headless, width, height, ['/eval', DEFAULT_AGENT_URL, DEFAULT_BABEL_POLYFILL_URL, DEFAULT_AGENT_TRANSFORM_URL], !args.debug, chromeArgs);
-
-      console.log("=========== here 3 ChromeDriver launched")
+      console.log("[DEBUG] ChromeDriver launched")
 
       if (args['take-screenshots'] > -1) {
         screenshotTimer = setInterval(async function() {
