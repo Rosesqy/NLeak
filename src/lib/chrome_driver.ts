@@ -66,7 +66,7 @@ function spawnChromeBrowser(session: ChromeSession, headless: boolean, width: nu
       const browser = session.spawnBrowser(
         Object.assign(
           {
-            executablePath: '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
+            executablePath: '/Applications/Google Chrome_2018.app/Contents/MacOS/Google Chrome',
           },
           baseOptions
         )
@@ -140,13 +140,14 @@ export default class ChromeDriver {
     const runtime = new ChromeRuntime(debugClient);
     const dom = new ChromeDOM(debugClient);
     await Promise.all([heapProfiler.enable(), network.enable({}),  chromeConsole.enable(), page.enable(), runtime.enable(), dom.enable()]);
+    console.log("[DEBUG] all debugger ready!", network, dom)
 
-    // // Intercept network requests.
-    // // await network.setRequestInterceptionEnabled({ enabled: true });
-    // // Disable cache
-    // await network.setCacheDisabled({ cacheDisabled: true });
-    // // Disable service workers
-    // await network.setBypassServiceWorker({ bypass: true });
+    // Intercept network requests.
+    // await network.setRequestInterceptionEnabled({ enabled: true });
+    // Disable cache
+    await network.setCacheDisabled({ cacheDisabled: true });
+    // Disable service workers
+    await network.setBypassServiceWorker({ bypass: true });
 
     const driver = new ChromeDriver(
       log,
