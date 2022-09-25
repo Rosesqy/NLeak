@@ -1,7 +1,7 @@
 import {readFileSync, mkdirSync, existsSync, createWriteStream, writeFileSync} from 'fs';
 import {join} from 'path';
 import BLeak from '../../lib/bleak';
-import ChromeDriver from '../../lib/chrome_driver';
+import ChromeDriver from '../../lib/driver/chrome_driver';
 import TextReporter from '../../lib/text_reporter';
 import {createGzip} from 'zlib';
 import ProgressProgressBar from '../../lib/progress_progress_bar';

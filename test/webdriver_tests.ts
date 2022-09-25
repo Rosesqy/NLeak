@@ -1,6 +1,6 @@
 import createHTTPServer from './util/http_server';
 import {Server as HTTPServer} from 'http';
-import ChromeDriver from '../src/lib/chrome_driver';
+import ChromeDriver from '../src/lib/driver/chrome_driver';
 import {equal as assertEqual} from 'assert';
 import NopLog from '../src/common/nop_log';
 

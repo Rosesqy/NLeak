@@ -1,7 +1,7 @@
 import {Server as HTTPServer} from 'http';
 import BLeak from '../src/lib/bleak';
 import createHTTPServer from './util/http_server';
-import ChromeDriver from '../src/lib/chrome_driver';
+import ChromeDriver from '../src/lib/driver/chrome_driver';
 import {readFileSync} from 'fs';
 import {equal as assertEqual} from 'assert';
 import NopProgressBar from '../src/lib/nop_progress_bar';

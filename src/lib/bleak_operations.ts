@@ -1,4 +1,4 @@
-import ChromeDriver from './chrome_driver';
+import ChromeDriver from './driver/chrome_driver';
 import {StepType, SnapshotSizeSummary, IProgressBar, OperationType, Log} from '../common/interfaces';
 import BLeakConfig from './bleak_config';
 import {wait} from '../common/util';

@@ -1,6 +1,6 @@
 import {CommandModule} from 'yargs';
 import BLeak from '../../lib/bleak';
-import ChromeDriver from '../../lib/chrome_driver';
+import ChromeDriver from '../../lib/driver/chrome_driver';
 import ProgressProgressBar from '../../lib/progress_progress_bar';
 import {readFileSync, writeFileSync} from 'fs';
 import BLeakResults from '../../lib/bleak_results';

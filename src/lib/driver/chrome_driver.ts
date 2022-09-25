@@ -1,4 +1,4 @@
-import HeapSnapshotParser from '../lib/heap_snapshot_parser';
+import HeapSnapshotParser from '../heap_snapshot_parser';
 import {createSession} from 'chrome-debugging-client';
 import {ISession as ChromeSession, IBrowserProcess as ChromeProcess} from 'chrome-debugging-client/dist/lib/types';
 import {HeapProfiler as ChromeHeapProfiler, Network as ChromeNetwork, Console as ChromeConsole, Page as ChromePage, Runtime as ChromeRuntime, DOM as ChromeDOM} from "chrome-debugging-client/dist/protocol/tot";
@@ -9,8 +9,8 @@ import {parseScript as parseJavaScript} from 'esprima';
 import * as childProcess from 'child_process';
 import MITMProxy from 'mitmproxy';
 import {platform} from 'os';
-import {Log} from '../common/interfaces';
-import {wait} from '../common/util';
+import { Log, IDriver } from '../../common/interfaces';
+import {wait} from '../../common/util';
 
 // HACK: Patch spawn to work around chrome-debugging-client limitation
 // https://github.com/krisselden/chrome-debugging-client/issues/10
@@ -113,7 +113,7 @@ function spawnChromeBrowser(session: ChromeSession, headless: boolean, width: nu
   }
 }
 
-export default class ChromeDriver {
+export default class ChromeDriver implements IDriver {
   public static async Launch(log: Log, headless: boolean, width: number, height: number, interceptPaths: string[] = [], quiet: boolean = true, chromeArgs: string[] = []): Promise<ChromeDriver> {
     const mitmProxy = await MITMProxy.Create(undefined, interceptPaths, quiet);
 

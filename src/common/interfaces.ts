@@ -1,4 +1,20 @@
+import MITMProxy from 'mitmproxy';
+import HeapSnapshotParser from '../lib/heap_snapshot_parser';
 import TimeLog from './time_log';
+
+/**
+ * A NLeak driver interface.
+ */
+export interface IDriver {
+  readonly mitmProxy: MITMProxy;
+  takeScreenshot(): Promise<Buffer>;
+  relaunch(): Promise<IDriver>;
+  navigateTo(url: string): Promise<any>;
+  runCode<T>(expression: string): Promise<T>;
+  takeHeapSnapshot(): HeapSnapshotParser;
+  debugLoop(): Promise<void>;
+  shutdown(): Promise<void>;
+}
 
 /**
  * A BLeak configuration file.

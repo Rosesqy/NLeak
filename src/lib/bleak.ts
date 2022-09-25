@@ -1,6 +1,6 @@
 import {IProgressBar} from '../common/interfaces';
 import HeapSnapshotParser from './heap_snapshot_parser';
-import ChromeDriver from './chrome_driver';
+import ChromeDriver from './driver/chrome_driver';
 import BLeakResults from './bleak_results';
 import BLeakConfig from './bleak_config';
 import {FindAndDiagnoseLeaks, EvaluateRankingMetricsOperation, OperationState} from './bleak_operations';

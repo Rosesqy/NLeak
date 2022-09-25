@@ -1,4 +1,4 @@
-import ChromeDriver from '../../lib/chrome_driver';
+import ChromeDriver from '../../lib/driver/chrome_driver';
 import getInterceptor from '../../lib/mitmproxy_interceptor';
 import {readFileSync} from 'fs';
 import {CommandModule} from 'yargs';
