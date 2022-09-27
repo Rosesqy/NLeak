@@ -1,8 +1,8 @@
 import * as repl from 'repl';
 import { parseScript as parseJavaScript } from 'esprima';
-import * as childProcess from 'child_process';
+// import * as childProcess from 'child_process';
 import MITMProxy from 'mitmproxy';
-import * as v8 from "v8";
+// import * as v8 from "v8";
 
 import HeapSnapshotParser from '../heap_snapshot_parser';
 import { Log, IDriver } from '../../common/interfaces';
@@ -33,7 +33,7 @@ export default class NodeDriver implements IDriver {
   public readonly mitmProxy: MITMProxy;
   private _interceptPaths: string[];
   private _quiet: boolean;
-  private _shutdown: boolean;
+  // private _shutdown: boolean;
 
   private constructor(
     log: Log,
@@ -43,23 +43,9 @@ export default class NodeDriver implements IDriver {
     this._log = log;
     this.mitmProxy = mitmProxy;
     this._interceptPaths = interceptPaths;
+    // this._shutdown = false;
 
     log.log("[DEBUG] in constructor");
-    // this._console.messageAdded = (evt) => {
-    //   const m = evt.message;
-    //   log.debug(
-    //     `[${m.level}] [${m.source}] ${m.url}:${m.line}:${m.column} ${m.text}`
-    //   );
-    // };
-
-    // this._runtime.exceptionThrown = (evt) => {
-    //   const e = evt.exceptionDetails;
-    //   log.error(exceptionDetailsToString(e));
-    // };
-
-    // this._page.frameStoppedLoading = (e) => {
-    //   this._loadedFrames.add(e.frameId);
-    // };
   }
 
   // dummy API
@@ -144,7 +130,7 @@ export default class NodeDriver implements IDriver {
   }
 
   public async shutdown(): Promise<void> {
-    this._shutdown = true;
+    // this._shutdown = true;
     // await Promise.all([this._process.dispose(), this.mitmProxy.shutdown()]);
     return new Promise<void>(() => {
       return "shutdown needs implementation"

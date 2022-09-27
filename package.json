@@ -11,6 +11,7 @@
     "build:viewer": "tsc",
     "rollup:viewer": "rollup -c",
     "rollup:viewer:production": "rollup -c --environment BUILD:production",
+    "dev": "npm-run-all build:node make_dist && node bleak run-node --config ./test/config.js --out ./test/",
     "test": "npm-run-all -s build nyc:test",
     "nyc:test": "nyc mocha --require source-map-support/register build/node/test",
     "watch": "npm-run-all -s build -p tsc:viewer:watch tsc:watch rollup:viewer:watch rollup:viewer:production:watch make_dist:watch",

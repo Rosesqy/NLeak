@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import * as yargs from 'yargs';
 import RunCommand from './commands/run';
+import RunNodeCommand from './commands/run_node';
 import FindGrowingPaths from './commands/find_growing_paths';
 import ProxySession from './commands/proxy_session';
 import TransformJavaScript from './commands/transform_javascript';
@@ -10,6 +11,7 @@ import ProcessTimeLog from './commands/process_time_log';
 import ProduceHeapGraph from './commands/produce_heap_graph';
 
 yargs.command(RunCommand)
+     .command(RunNodeCommand)
      .command(FindGrowingPaths)
      .command(ProxySession)
      .command(TransformJavaScript)
