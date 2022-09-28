@@ -181,3 +181,9 @@ yarn test
 ### Debugging Tips
 
 The bleak executable (runnable via `./bleak` once built) has a number of useful debug commands. For example, use `proxy-session` to debug issues with BLeak's proxy / diagnoses phase.
+
+### Docker build setup
+```
+$ docker build . -t nleak_build --platform=linux/amd64
+
+$ docker run -v <path on host>:/home/NLeak --platform=linux/amd64 -it nleak_build:latest
