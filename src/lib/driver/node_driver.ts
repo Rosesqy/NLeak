@@ -1,12 +1,36 @@
 import * as repl from 'repl';
 import { parseScript as parseJavaScript } from 'esprima';
-// import * as childProcess from 'child_process';
+import * as childProcess from 'child_process';
 import MITMProxy from 'mitmproxy';
 // import * as v8 from "v8";
 
 import HeapSnapshotParser from '../heap_snapshot_parser';
 import { Log, IDriver } from '../../common/interfaces';
 import { wait } from '../../common/util';
+
+function forkNodeProcess(): childProcess.ChildProcess {
+  let node: childProcess.ChildProcess;
+  try {
+    node = childProcess.fork(`${__dirname}/sub.js`);
+
+    // attach events
+    node.on('message', (msg) => {
+      console.log('PARENT got message:', msg);
+    });
+    node.stdout.on('data', (data) => {
+      console.log(`PID[${node.pid}] stdout: ${data}`);
+    });
+    node.on('close', (code) => {
+      console.log(`PID[${node.pid}] child process close all stdio with code ${code}`);
+    });
+    node.on('exit', (code) => {
+      console.log(`PID[${node.pid}] child process exited with code ${code}`);
+    });
+  } catch (error) {
+    console.error("failed to spawn another NodeJS child process");
+  }
+  return node;
+}
 
 export default class NodeDriver implements IDriver {
   public static async Launch(
@@ -19,12 +43,14 @@ export default class NodeDriver implements IDriver {
     // Tell mitmProxy to stash data requested through the proxy.
     mitmProxy.stashEnabled = true;
 
+    const nodeProcess = forkNodeProcess();
+
     const driver = new NodeDriver(
       log,
       interceptPaths,
       mitmProxy,
+      nodeProcess,
     );
-    console.log("[DEBUG] inited driver", driver);
 
     return driver;
   }
@@ -33,19 +59,24 @@ export default class NodeDriver implements IDriver {
   public readonly mitmProxy: MITMProxy;
   private _interceptPaths: string[];
   private _quiet: boolean;
-  // private _shutdown: boolean;
+  private _process: childProcess.ChildProcess;
+  private _shutdown: boolean;
 
   private constructor(
     log: Log,
     interceptPaths: string[],
     mitmProxy: MITMProxy,
+    nodeProcess: childProcess.ChildProcess,
   ) {
     this._log = log;
     this.mitmProxy = mitmProxy;
     this._interceptPaths = interceptPaths;
-    // this._shutdown = false;
+    this._process = nodeProcess;
+    this._shutdown = false;
 
-    log.log("[DEBUG] in constructor");
+    log.log("[DEBUG] in constructor, need use:");
+    log.log(this._process + "");
+    log.log(this._shutdown + "");
   }
 
   // dummy API
@@ -84,17 +115,14 @@ export default class NodeDriver implements IDriver {
   }
 
   public takeHeapSnapshot(): HeapSnapshotParser {
+    console.log("in takeHeapSnapshot");
     const parser = new HeapSnapshotParser();
 
-    // 200 KB chunks
-    // this._heapProfiler.addHeapSnapshotChunk = (evt: any) => {
-    //   parser.addSnapshotChunk(evt.chunk);
-    // };
+    this._process.send({ action: 'sayHello' })
 
-    // // Always take a DOM snapshot before taking a real snapshot.
-    // this._takeDOMSnapshot().then(() => {
-    //   this._heapProfiler.takeHeapSnapshot({ reportProgress: false });
-    // });
+    // TODO: take & add snapshot
+    // parser.addSnapshotChunk(evt.chunk);
+
     return parser;
   }
   // private async _takeDOMSnapshot(): Promise<void> {

@@ -90,7 +90,10 @@ const RunNode: CommandModule = {
         [],
         true
       );
-      console.log("[DEBUG] nodeDriver launched", bleakResults, nodeDriver);
+      console.log("[DEBUG] nodeDriver launched", bleakResults, nodeDriver + "");
+
+      // Test driver snippet, need to removed
+      nodeDriver.takeHeapSnapshot();
 
       // belows start the BLeak FindLeaks logic, TODO: replace all ChromeDriver interface to IDriver
       // let i = 0;
