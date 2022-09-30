@@ -1,10 +1,10 @@
-import ChromeDriver from '../../lib/driver/chrome_driver';
 import getInterceptor from '../../lib/mitmproxy_interceptor';
 import {readFileSync} from 'fs';
 import {CommandModule} from 'yargs';
 import BLeakConfig from '../../lib/bleak_config';
 import {DEFAULT_AGENT_URL, DEFAULT_BABEL_POLYFILL_URL, DEFAULT_AGENT_TRANSFORM_URL} from '../../lib/mitmproxy_interceptor';
 import ConsoleLog from '../../common/console_log';
+import NodeDriver from '../../lib/driver/node_driver';
 
 interface CommandLineArgs {
   config: string;
@@ -39,7 +39,7 @@ const ProxySession: CommandModule = {
     const url = config.url;
     const diagnose = args.diagnose;
     const fixes = args.fix;
-    const driver = await ChromeDriver.Launch(ConsoleLog, false, 1920, 1080, ['/eval', DEFAULT_AGENT_URL, DEFAULT_BABEL_POLYFILL_URL, DEFAULT_AGENT_TRANSFORM_URL]);
+    const driver = await NodeDriver.Launch(ConsoleLog, ['/eval', DEFAULT_AGENT_URL, DEFAULT_BABEL_POLYFILL_URL, DEFAULT_AGENT_TRANSFORM_URL]);
     driver.mitmProxy.cb = getInterceptor({
       log: ConsoleLog,
       rewrite: diagnose,

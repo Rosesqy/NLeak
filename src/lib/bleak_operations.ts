@@ -1,4 +1,3 @@
-import ChromeDriver from './driver/chrome_driver';
 import {StepType, SnapshotSizeSummary, IProgressBar, OperationType, Log} from '../common/interfaces';
 import BLeakConfig from './bleak_config';
 import {wait} from '../common/util';
@@ -10,12 +9,14 @@ import StackFrameConverter from './stack_frame_converter';
 import PathToString from './path_to_string';
 import NopLog from '../common/nop_log';
 
+import { IDriver } from "../common/interfaces";
+
 type SnapshotCb = (sn: HeapSnapshotParser, log: Log) => Promise<void>;
 
 export class OperationState {
   public results: BLeakResults = null;
   constructor(
-    public chromeDriver: ChromeDriver,
+    public iDriver: IDriver,
     public progressBar: IProgressBar,
     public config: BLeakConfig) {}
 }
@@ -82,7 +83,7 @@ class NavigateOperation extends Operation {
 
   protected _run(opSt: OperationState): Promise<void> {
     return opSt.progressBar.timeEvent(OperationType.NAVIGATE, () => {
-      return opSt.chromeDriver.navigateTo(this._url);
+      return opSt.iDriver.navigateTo(this._url);
     });
   }
 }
@@ -107,7 +108,7 @@ class CheckOperation extends Operation {
     return opSt.progressBar.timeEvent(OperationType.WAIT_FOR_PAGE, async () => {
       // Wait until either the operation is canceled (timeout) or the check succeeds.
       while (!this._cancelled) {
-        const success = await opSt.chromeDriver.runCode<boolean>(`typeof(BLeakConfig) !== "undefined" && BLeakConfig.${this._stepType}[${this._id}].check()`);
+        const success = await opSt.iDriver.runCode<boolean>(`typeof(BLeakConfig) !== "undefined" && BLeakConfig.${this._stepType}[${this._id}].check()`);
         if (success) {
           return;
         }
@@ -129,7 +130,7 @@ class NextOperation extends Operation {
   }
 
   public async _run(opSt: OperationState): Promise<void> {
-    return opSt.chromeDriver.runCode<void>(`BLeakConfig.${this._stepType}[${this._id}].next()`);
+    return opSt.iDriver.runCode<void>(`BLeakConfig.${this._stepType}[${this._id}].next()`);
   }
 }
 
@@ -159,7 +160,7 @@ class TakeHeapSnapshotOperation extends Operation {
   }
 
   public async _run(opSt: OperationState): Promise<void> {
-    const sn = opSt.chromeDriver.takeHeapSnapshot();
+    const sn = opSt.iDriver.takeHeapSnapshot();
     return this._snapshotCb(sn, opSt.progressBar);
   }
 }
@@ -175,7 +176,7 @@ class ConfigureProxyOperation extends Operation {
 
   public async _run(opSt: OperationState): Promise<void> {
     this._config.log = opSt.progressBar;
-    opSt.chromeDriver.mitmProxy.cb = getInterceptor(this._config);
+    opSt.iDriver.mitmProxy.cb = getInterceptor(this._config);
   }
 }
 
@@ -235,7 +236,7 @@ class InstrumentGrowingPathsOperation extends Operation {
   }
 
   public _run(opSt: OperationState): Promise<void> {
-    return opSt.chromeDriver.runCode<void>(`window.$$$INSTRUMENT_PATHS$$$(${JSON.stringify(toPathTree(opSt.results.leaks))})`);
+    return opSt.iDriver.runCode<void>(`window.$$$INSTRUMENT_PATHS$$$(${JSON.stringify(toPathTree(opSt.results.leaks))})`);
   }
 }
 
@@ -343,8 +344,8 @@ class GetGrowthStacksOperation extends Operation {
 
   protected async _run(opSt: OperationState): Promise<void> {
     return opSt.progressBar.timeEvent(OperationType.GET_GROWTH_STACKS, async () => {
-      const traces = await opSt.chromeDriver.runCode<GrowingStackTraces>(`window.$$$GET_STACK_TRACES$$$()`);
-      const growthStacks = StackFrameConverter.ConvertGrowthStacks(opSt.chromeDriver.mitmProxy, opSt.config.url, opSt.results, traces);
+      const traces = await opSt.iDriver.runCode<GrowingStackTraces>(`window.$$$GET_STACK_TRACES$$$()`);
+      const growthStacks = StackFrameConverter.ConvertGrowthStacks(opSt.iDriver.mitmProxy, opSt.config.url, opSt.results, traces);
       opSt.results.leaks.forEach((lr) => {
         const index = lr.id;
         const stacks = growthStacks[index] || [];

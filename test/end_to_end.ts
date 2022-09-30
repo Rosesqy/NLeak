@@ -1,7 +1,7 @@
 import {Server as HTTPServer} from 'http';
 import BLeak from '../src/lib/bleak';
 import createHTTPServer from './util/http_server';
-import ChromeDriver from '../src/lib/driver/chrome_driver';
+import NodeDriver from '../src/lib/driver/node_driver';
 import {readFileSync} from 'fs';
 import {equal as assertEqual} from 'assert';
 import NopProgressBar from '../src/lib/nop_progress_bar';
@@ -270,14 +270,14 @@ describe('End-to-end Tests', function() {
   // 10 minute timeout.
   this.timeout(600000);
   let httpServer: HTTPServer;
-  let driver: ChromeDriver;
+  let driver: NodeDriver;
   before(async function() {
     httpServer = await createHTTPServer(FILES, HTTP_PORT);
     if (!DEBUG) {
       // Silence debug messages.
       console.debug = () => {};
     }
-    driver = await ChromeDriver.Launch(NopLog, true, 1920, 1080);
+    driver = await NodeDriver.Launch(NopLog);
   });
 
   function createStandardLeakTest(description: string, rootFilename: string, expected_line: number): void {

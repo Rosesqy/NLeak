@@ -1,9 +1,9 @@
 import {IProgressBar} from '../common/interfaces';
 import HeapSnapshotParser from './heap_snapshot_parser';
-import ChromeDriver from './driver/chrome_driver';
 import BLeakResults from './bleak_results';
 import BLeakConfig from './bleak_config';
 import {FindAndDiagnoseLeaks, EvaluateRankingMetricsOperation, OperationState} from './bleak_operations';
+import NodeDriver from './driver/node_driver';
 
 function defaultSnapshotCb(): Promise<void> {
   return Promise.resolve();
@@ -16,7 +16,7 @@ export class BLeakDetector {
    * @param progressBar A progress bar, to which BLeak will print information about its progress.
    * @param driver The Chrome driver.
    */
-  public static async FindLeaks(configSource: string, progressBar: IProgressBar, driver: ChromeDriver, flushResults: (results: BLeakResults) => void, snapshotCb: (sn: HeapSnapshotParser) => Promise<void> = defaultSnapshotCb, bleakResults?: BLeakResults): Promise<BLeakResults> {
+  public static async FindLeaks(configSource: string, progressBar: IProgressBar, driver: NodeDriver, flushResults: (results: BLeakResults) => void, snapshotCb: (sn: HeapSnapshotParser) => Promise<void> = defaultSnapshotCb, bleakResults?: BLeakResults): Promise<BLeakResults> {
     const detector = new BLeakDetector(driver, progressBar, configSource, snapshotCb);
     return detector.findAndDiagnoseLeaks(flushResults, bleakResults);
   }
@@ -34,16 +34,16 @@ export class BLeakDetector {
    * @param flushResults Called when the results file should be flushed to disk.
    * @param snapshotCb (Optional) Snapshot callback.
    */
-  public static async EvaluateRankingMetrics(configSource: string, progressBar: IProgressBar, driver: ChromeDriver, results: BLeakResults, flushResults: (results: BLeakResults) => void, snapshotCb: (sn: HeapSnapshotParser, metric: string, leaksFixed: number, iteration: number) => Promise<void> = defaultSnapshotCb): Promise<void> {
+  public static async EvaluateRankingMetrics(configSource: string, progressBar: IProgressBar, driver: NodeDriver, results: BLeakResults, flushResults: (results: BLeakResults) => void, snapshotCb: (sn: HeapSnapshotParser, metric: string, leaksFixed: number, iteration: number) => Promise<void> = defaultSnapshotCb): Promise<void> {
     const detector = new BLeakDetector(driver, progressBar, configSource);
     return detector.evaluateRankingMetrics(results, flushResults, snapshotCb);;
   }
 
-  private _driver: ChromeDriver;
+  private _driver: NodeDriver;
   private readonly _progressBar: IProgressBar;
   private readonly _config: BLeakConfig;
   private _snapshotCb: (sn: HeapSnapshotParser) => Promise<void>;
-  private constructor(driver: ChromeDriver, progressBar: IProgressBar, configSource: string, snapshotCb: (sn: HeapSnapshotParser) => Promise<void> = defaultSnapshotCb) {
+  private constructor(driver: NodeDriver, progressBar: IProgressBar, configSource: string, snapshotCb: (sn: HeapSnapshotParser) => Promise<void> = defaultSnapshotCb) {
     this._driver = driver;
     this._progressBar = progressBar;
     this._config = BLeakConfig.FromSource(configSource);

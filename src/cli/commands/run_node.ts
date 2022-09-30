@@ -92,7 +92,7 @@ const RunNode: CommandModule = {
       );
       console.log("[DEBUG] nodeDriver launched", bleakResults, nodeDriver);
 
-      // belows start the BLeak FindLeaks logic, TODO: replace all ChromeDriver interface to IDriver
+      // belows start the BLeak FindLeaks logic
       // let i = 0;
       // BLeak.FindLeaks(
       //   configFileSource,

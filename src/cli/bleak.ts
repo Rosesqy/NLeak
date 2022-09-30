@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import * as yargs from 'yargs';
-import RunCommand from './commands/run';
+import RunCommand from './commands/run_node';
 import RunNodeCommand from './commands/run_node';
 import FindGrowingPaths from './commands/find_growing_paths';
 import ProxySession from './commands/proxy_session';

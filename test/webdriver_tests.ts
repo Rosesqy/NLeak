@@ -1,6 +1,6 @@
 import createHTTPServer from './util/http_server';
 import {Server as HTTPServer} from 'http';
-import ChromeDriver from '../src/lib/driver/chrome_driver';
+import NodeDriver from '../src/lib/driver/node_driver';
 import {equal as assertEqual} from 'assert';
 import NopLog from '../src/common/nop_log';
 
@@ -10,7 +10,7 @@ describe("Chrome Driver", function() {
   // 30 second timeout.
   this.timeout(30000);
   let httpServer: HTTPServer;
-  let chromeDriver: ChromeDriver;
+  let nodeDriver: NodeDriver;
   before(async function() {
     httpServer = await createHTTPServer({
       "/": {
@@ -20,20 +20,20 @@ describe("Chrome Driver", function() {
     }, HTTP_PORT);
     // Silence debug messages.
     console.debug = () => {};
-    chromeDriver = await ChromeDriver.Launch(NopLog, true, 1920, 1080);
+    nodeDriver = await NodeDriver.Launch(NopLog);
   });
 
   it("Successfully loads a webpage", async function() {
-    await chromeDriver.navigateTo(`http://localhost:${HTTP_PORT}/`);
-    const str = await chromeDriver.runCode("document.getElementById('container').innerText");
+    await nodeDriver.navigateTo(`http://localhost:${HTTP_PORT}/`);
+    const str = await nodeDriver.runCode("document.getElementById('container').innerText");
     assertEqual(str, "ContainerText");
   });
 
   after(async function() {
     return new Promise<void>((resolve, reject) => {
       function closeChrome() {
-        if (chromeDriver) {
-          chromeDriver.shutdown().then(resolve, reject);
+        if (nodeDriver) {
+          nodeDriver.shutdown().then(resolve, reject);
         } else {
           resolve();
         }

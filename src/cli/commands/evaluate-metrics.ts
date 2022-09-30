@@ -1,6 +1,6 @@
 import {CommandModule} from 'yargs';
 import BLeak from '../../lib/bleak';
-import ChromeDriver from '../../lib/driver/chrome_driver';
+import NodeDriver from '../../lib/driver/node_driver';
 import ProgressProgressBar from '../../lib/progress_progress_bar';
 import {readFileSync, writeFileSync} from 'fs';
 import BLeakResults from '../../lib/bleak_results';
@@ -11,7 +11,6 @@ interface CommandLineArgs {
   results: string;
   debug: boolean;
   headless: boolean;
-  chromeSize: string;
   'resume-after-failure': boolean;
 }
 
@@ -39,11 +38,6 @@ const EvaluateMetrics: CommandModule = {
       default: false,
       describe: 'Run in Chrome Headless (currently buggy)'
     },
-    chromeSize: {
-      type: 'string',
-      default: '1920x1080',
-      describe: 'Specifies the size of the Chrome browser window'
-    },
     'resume-after-failure': {
       type: 'boolean',
       default: false,
@@ -51,17 +45,8 @@ const EvaluateMetrics: CommandModule = {
     }
   },
   handler: async function handler(args: CommandLineArgs) {
-    let width: number, height: number;
-    {
-      const chromeSize = /^([0-9]+)x([0-9]+)$/.exec(args.chromeSize);
-      if (!chromeSize) {
-        throw new Error(`Invalid chromeSize: ${args.chromeSize}`);
-      }
-      width = parseInt(chromeSize[1], 10);
-      height = parseInt(chromeSize[2], 10);
-    }
     const progressBar = new ProgressProgressBar(args.debug, false);
-    const chromeDriver = await ChromeDriver.Launch(progressBar, args.headless, width, height, [DEFAULT_AGENT_URL, DEFAULT_BABEL_POLYFILL_URL, DEFAULT_AGENT_TRANSFORM_URL], !args.debug);
+    const nodeDriver = await NodeDriver.Launch(progressBar, [DEFAULT_AGENT_URL, DEFAULT_BABEL_POLYFILL_URL, DEFAULT_AGENT_TRANSFORM_URL], !args.debug);
     const configFileSource = readFileSync(args.config).toString();
     const results = BLeakResults.FromJSON(JSON.parse(readFileSync(args.results, 'utf8')));
 
@@ -71,7 +56,7 @@ const EvaluateMetrics: CommandModule = {
         return;
       }
       shuttingDown = true;
-      await chromeDriver.shutdown();
+      await nodeDriver.shutdown();
       // All sockets/subprocesses/resources *should* be closed, so we can just exit.
       process.exit(0);
     }
@@ -83,14 +68,14 @@ const EvaluateMetrics: CommandModule = {
       shutDown();
     });
 
-    BLeak.EvaluateRankingMetrics(configFileSource, progressBar, chromeDriver, results, (results) => {
+    BLeak.EvaluateRankingMetrics(configFileSource, progressBar, nodeDriver, results, (results) => {
       writeFileSync(args.results, Buffer.from(JSON.stringify(results), 'utf8'));
     }).then(shutDown).catch((e) => {
       progressBar.error(`${e}`);
       if (args['resume-after-failure']) {
         progressBar.log(`Resuming...`);
         shuttingDown = true;
-        chromeDriver.shutdown().then(() => {
+        nodeDriver.shutdown().then(() => {
           handler(args);
         }).catch(() => {
           handler(args);
